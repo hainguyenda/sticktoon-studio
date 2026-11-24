@@ -94,6 +94,11 @@ export interface Settings {
   sfxVolume: number;
   batchDelayMs: number;
   maxRetries: number;
+  localVoiceVi: string;
+  localVoiceEn: string;
+  localTtsSpeed: number;
+  localTtsPause: number;
+  localTtsSteps: number;
 }
 
 export type TabId = "script" | "visual" | "audio" | "export";

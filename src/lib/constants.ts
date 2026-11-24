@@ -33,6 +33,11 @@ export const DEFAULT_SETTINGS: Settings = {
   sfxVolume: 0.8,
   batchDelayMs: 2500,
   maxRetries: 5,
+  localVoiceVi: "hoang_nam",
+  localVoiceEn: "am_onyx",
+  localTtsSpeed: 1,
+  localTtsPause: 0.3,
+  localTtsSteps: 16,
 };
 
 export const DEFAULT_CAPTIONS: CaptionSettings = {

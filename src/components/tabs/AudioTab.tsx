@@ -13,6 +13,7 @@ import { SFX_TYPES } from "@/lib/types";
 import type { RealSfx } from "@/lib/types";
 import { Button, DropZone, NumberField, Panel, cx, fmtTime } from "../ui";
 import { runAutoSync, useVoiceBuffer } from "../Timeline";
+import VoiceStudio from "../VoiceStudio";
 
 const REAL_SFX = SFX_TYPES.filter((s): s is RealSfx => s !== "none");
 
@@ -61,6 +62,7 @@ export default function AudioTab() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-4">
+      <VoiceStudio />
       <Panel
         title="Giọng đọc (Voiceover)"
         icon={<Mic className="h-4 w-4 text-accent" />}
