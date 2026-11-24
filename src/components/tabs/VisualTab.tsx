@@ -16,6 +16,7 @@ import {
   Square,
   Trash2,
   Wand2,
+  ClipboardCopy,
   X,
 } from "lucide-react";
 import { useStudio } from "@/store/studio";
@@ -29,6 +30,22 @@ import { CAMERA_EFFECTS, SFX_TYPES, SHOT_TYPES } from "@/lib/types";
 import type { CameraEffect, Scene, ShotType, SfxType } from "@/lib/types";
 import { EFFECT_LABELS, SCENE_COLORS, SFX_LABELS, SHOT_LABELS, STYLE_LOCK } from "@/lib/constants";
 import { Button, DropZone, NumberField, Panel, ProgressBar, Select, Textarea, cx, useObjectUrl } from "../ui";
+
+async function copyToClipboard(text: string, okMsg: string) {
+  const toast = useStudio.getState().toast;
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("success", okMsg);
+  } catch {
+    toast("error", "Trình duyệt chặn clipboard – hãy thử lại.");
+  }
+}
+
+/** Full prompt to paste into Gemini / ChatGPT image chat (attach the character reference images there yourself). */
+function manualScenePrompt(scene: Scene): string {
+  const p = useStudio.getState().project;
+  return `${buildScenePrompt(withStyleLock(scene.imagePrompt), p.script.characters, p.characterRefs.length > 0)}\nAspect ratio: 9:16 vertical (1080x1920).`;
+}
 
 type GenState = Record<number, { status: "queued" | "running" | "retrying" | "done" | "error"; msg?: string }>;
 
@@ -139,9 +156,25 @@ export default function VisualTab({ onOpenSettings }: { onOpenSettings: () => vo
                 Dừng
               </Button>
             ) : (
-              <Button size="sm" variant="primary" icon={<Layers className="h-3.5 w-3.5" />} onClick={runBatch} disabled={!scenes.length}>
-                Tạo hàng loạt
-              </Button>
+              <>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  icon={<ClipboardCopy className="h-3.5 w-3.5" />}
+                  disabled={!scenes.length}
+                  onClick={() =>
+                    void copyToClipboard(
+                      scenes.map((sc, i) => `=== Cảnh ${String(i + 1).padStart(2, "0")} ===\n${manualScenePrompt(sc)}`).join("\n\n"),
+                      `Đã copy prompt ${scenes.length} cảnh.`,
+                    )
+                  }
+                >
+                  Copy tất cả prompt
+                </Button>
+                <Button size="sm" icon={<Layers className="h-3.5 w-3.5" />} onClick={runBatch} disabled={!scenes.length}>
+                  Tạo hàng loạt (API)
+                </Button>
+              </>
             )}
           </>
         }
@@ -162,7 +195,7 @@ export default function VisualTab({ onOpenSettings }: { onOpenSettings: () => vo
           </div>
         )}
         <p className="mb-3 text-[11px] text-gray-500">
-          Model: <code className="text-gray-300">{settings.imageModel}</code> · ảnh tham chiếu nhân vật được đính kèm tự động · có thể kéo-thả .png/.jpg/.webp hoặc clip .mp4/.webm vào từng thẻ.
+          Cách thủ công: bấm <b className="text-gray-300">Copy prompt ảnh</b> → dán vào Gemini (đính kèm ảnh nhân vật mẫu) → tải ảnh về → <b className="text-gray-300">kéo-thả vào thẻ cảnh</b>. Nhận .png/.jpg/.webp hoặc clip .mp4/.webm. Nút “API” cần Gemini API key (model {settings.imageModel}).
         </p>
         {scenes.length === 0 ? (
           <p className="py-6 text-center text-sm text-gray-500">Chưa có cảnh. Tạo kịch bản ở Tab 1 hoặc thêm cảnh thủ công.</p>
@@ -223,9 +256,20 @@ function CharacterLock({ requireKey }: { requireKey: () => boolean }) {
       title="Character Sheet Lock"
       icon={<Lock className="h-4 w-4 text-accent" />}
       actions={
-        <Button size="sm" variant="primary" loading={busy} icon={<Sparkles className="h-3.5 w-3.5" />} onClick={generateSheet}>
-          Tạo Character Sheet bằng AI
-        </Button>
+        <>
+          <Button
+            size="sm"
+            variant="primary"
+            icon={<ClipboardCopy className="h-3.5 w-3.5" />}
+            disabled={!characters.length}
+            onClick={() => void copyToClipboard(`${buildCharacterSheetPrompt(characters)}\nAspect ratio: 16:9.`, "Đã copy prompt Character Sheet – dán vào Gemini để tạo ảnh.")}
+          >
+            Copy prompt Character Sheet
+          </Button>
+          <Button size="sm" loading={busy} icon={<Sparkles className="h-3.5 w-3.5" />} onClick={generateSheet}>
+            Tạo bằng API
+          </Button>
+        </>
       }
     >
       <p className="mb-3 text-xs text-gray-400">
@@ -411,8 +455,19 @@ function SceneCard({
         </div>
         {state?.status === "error" && <p className="text-[11px] text-red-400">⚠ {state.msg}</p>}
         <div className="flex flex-wrap gap-1.5">
-          <Button size="sm" variant="primary" icon={<Wand2 className="h-3.5 w-3.5" />} onClick={(e) => { e.stopPropagation(); onGenerate(); }} loading={running} disabled={busy && !running}>
-            {asset ? "Tạo lại ảnh AI" : "Tạo ảnh AI"}
+          <Button
+            size="sm"
+            variant="primary"
+            icon={<ClipboardCopy className="h-3.5 w-3.5" />}
+            onClick={(e) => {
+              e.stopPropagation();
+              void copyToClipboard(manualScenePrompt(scene), `Đã copy prompt ảnh cảnh ${index + 1}.`);
+            }}
+          >
+            Copy prompt ảnh
+          </Button>
+          <Button size="sm" icon={<Wand2 className="h-3.5 w-3.5" />} onClick={(e) => { e.stopPropagation(); onGenerate(); }} loading={running} disabled={busy && !running}>
+            {asset ? "Tạo lại (API)" : "Tạo bằng API"}
           </Button>
           {asset && (
             <Button size="sm" variant="ghost" icon={<X className="h-3.5 w-3.5" />} onClick={() => void removeSceneAsset(scene.id)}>

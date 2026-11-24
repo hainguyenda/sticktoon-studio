@@ -22,7 +22,7 @@ import {
   Square,
 } from "lucide-react";
 import { useStudio } from "@/store/studio";
-import { generateScript } from "@/lib/gemini";
+import { buildManualDirectorPrompt, extractJson, finalizeScript, generateScript } from "@/lib/gemini";
 import { cleanVoiceover, countWords, validateScript } from "@/lib/validate";
 import { VOICE_TOOL_URL } from "@/lib/constants";
 import { downloadBlob, slugify } from "@/lib/zip";
@@ -40,6 +40,36 @@ export default function ScriptTab({ onOpenSettings }: { onOpenSettings: () => vo
   const [duration, setDuration] = useState(Math.min(60, Math.max(30, script.targetDuration || 45)));
   const [language, setLanguage] = useState<Language>(script.language);
   const [generating, setGenerating] = useState(false);
+  const [mode, setMode] = useState<"manual" | "api">(settings.geminiApiKey ? "api" : "manual");
+  const [pasted, setPasted] = useState("");
+  const [pasteError, setPasteError] = useState<string | null>(null);
+
+  const copyText = async (text: string, okMsg: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("success", okMsg);
+    } catch {
+      toast("error", "Trình duyệt chặn clipboard – hãy thử lại sau khi bấm vào trang.");
+    }
+  };
+
+  const copyDirectorPrompt = () => {
+    if (!topic.trim()) return toast("error", "Nhập chủ đề / tình huống hài trước.");
+    void copyText(buildManualDirectorPrompt(topic.trim(), duration, language), "Đã copy prompt – dán vào Claude hoặc Gemini rồi gửi.");
+  };
+
+  const applyPasted = () => {
+    setPasteError(null);
+    try {
+      const data = finalizeScript(extractJson(pasted), { topic: topic.trim(), duration, language });
+      if (script.scenes.length && !window.confirm("Thay kịch bản hiện tại bằng kịch bản vừa dán? (ảnh các cảnh cũ sẽ bị gỡ)")) return;
+      setScript(data, { keepAssets: false });
+      setPasted("");
+      toast("success", `Đã áp dụng kịch bản “${data.title}” – ${data.scenes.length} cảnh.`);
+    } catch (e) {
+      setPasteError((e as Error).message);
+    }
+  };
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -84,7 +114,28 @@ export default function ScriptTab({ onOpenSettings }: { onOpenSettings: () => vo
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
-      <Panel title="AI Director – Tạo kịch bản bằng Gemini" icon={<Bot className="h-4 w-4 text-accent" />}>
+      <Panel
+        title="AI Director – Tạo kịch bản"
+        icon={<Bot className="h-4 w-4 text-accent" />}
+        actions={
+          <div className="flex rounded-md border border-ink-600 p-0.5 text-xs">
+            {(
+              [
+                ["manual", "Thủ công (Claude/Gemini chat)"],
+                ["api", "Gemini API"],
+              ] as const
+            ).map(([m, label]) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                className={mode === m ? "rounded bg-accent px-2 py-1 font-semibold text-ink-950" : "px-2 py-1 text-gray-400 hover:text-white"}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        }
+      >
         <div className="space-y-3">
           <div>
             <Label hint={`${topic.length}/500`}>Chủ đề / tình huống hài</Label>
@@ -118,24 +169,71 @@ export default function ScriptTab({ onOpenSettings }: { onOpenSettings: () => vo
               />
             </div>
           </div>
+          {mode === "manual" ? (
+            <div className="space-y-3 rounded-lg border border-ink-700 bg-ink-900 p-3">
+              <div>
+                <p className="mb-2 text-xs text-gray-300">
+                  <b className="text-accent">Bước 1.</b> Copy prompt rồi dán vào Claude hoặc Gemini (bản chat bạn đang dùng), bấm gửi.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="primary" onClick={copyDirectorPrompt} icon={<ClipboardCopy className="h-4 w-4" />}>
+                    Copy prompt
+                  </Button>
+                  <Button onClick={() => window.open("https://claude.ai/new", "_blank", "noopener")} icon={<ExternalLink className="h-3.5 w-3.5" />}>
+                    Mở Claude
+                  </Button>
+                  <Button onClick={() => window.open("https://gemini.google.com/app", "_blank", "noopener")} icon={<ExternalLink className="h-3.5 w-3.5" />}>
+                    Mở Gemini
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-xs text-gray-300">
+                  <b className="text-accent">Bước 2.</b> Copy toàn bộ câu trả lời của AI (có hay không có khung \`\`\`json đều được) và dán vào đây.
+                </p>
+                <Textarea
+                  rows={6}
+                  spellCheck={false}
+                  value={pasted}
+                  onChange={(e) => {
+                    setPasted(e.target.value);
+                    setPasteError(null);
+                  }}
+                  placeholder='Dán kết quả AI trả về, ví dụ: ```json { "title": ..., "scenes": [...] } ```'
+                  className="font-mono text-xs"
+                />
+                {pasteError && (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-red-400">
+                    <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {pasteError}
+                  </p>
+                )}
+                <div className="mt-2">
+                  <Button variant="primary" onClick={applyPasted} disabled={!pasted.trim()} icon={<FileJson className="h-4 w-4" />}>
+                    Áp dụng kịch bản
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="primary" onClick={generate} loading={generating} icon={<Sparkles className="h-4 w-4" />}>
-              Tạo kịch bản bằng Gemini API
-            </Button>
-            {generating && (
-              <Button variant="danger" onClick={() => abortRef.current?.abort()} icon={<Square className="h-3.5 w-3.5" />}>
-                Hủy
+              <Button variant="primary" onClick={generate} loading={generating} icon={<Sparkles className="h-4 w-4" />}>
+                Tạo kịch bản bằng Gemini API
               </Button>
-            )}
-            <span className="text-xs text-gray-500">
-              Model: <code className="text-gray-300">{settings.textModel}</code>
-              {!settings.geminiApiKey && (
-                <button onClick={onOpenSettings} className="ml-2 text-accent hover:underline">
-                  (chưa có API key)
-                </button>
+              {generating && (
+                <Button variant="danger" onClick={() => abortRef.current?.abort()} icon={<Square className="h-3.5 w-3.5" />}>
+                  Hủy
+                </Button>
               )}
-            </span>
-          </div>
+              <span className="text-xs text-gray-500">
+                Model: <code className="text-gray-300">{settings.textModel}</code>
+                {!settings.geminiApiKey && (
+                  <button onClick={onOpenSettings} className="ml-2 text-accent hover:underline">
+                    (chưa có API key)
+                  </button>
+                )}
+              </span>
+            </div>
+          )}
           {script.scenes.length > 0 && (
             <p className="text-[11px] text-gray-500">⚠ Tạo kịch bản mới sẽ thay thế kịch bản và gỡ toàn bộ ảnh cảnh hiện tại (ảnh nhân vật tham chiếu & giọng đọc được giữ).</p>
           )}

@@ -151,7 +151,6 @@ function Header({ onSettings, onProjects }: { onSettings: () => void; onProjects
   const saveStatus = useStudio((s) => s.saveStatus);
   const newProject = useStudio((s) => s.newProject);
   const loadDemo = useStudio((s) => s.loadDemo);
-  const hasKey = useStudio((s) => !!s.settings.geminiApiKey);
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-ink-700 bg-ink-900 px-3">
@@ -196,11 +195,11 @@ function Header({ onSettings, onProjects }: { onSettings: () => void; onProjects
           onClick={onSettings}
           className={cx(
             "ml-1 inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm",
-            hasKey ? "text-gray-300 hover:bg-ink-700" : "bg-accent/15 text-accent ring-1 ring-accent/40 hover:bg-accent/25",
+            "text-gray-300 hover:bg-ink-700",
           )}
         >
           <SettingsIcon className="h-4 w-4" />
-          <span className="hidden sm:inline">{hasKey ? "Cài đặt" : "Nhập API Key"}</span>
+          <span className="hidden sm:inline">Cài đặt</span>
         </button>
       </div>
     </header>

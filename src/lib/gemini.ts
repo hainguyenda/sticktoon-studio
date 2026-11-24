@@ -206,13 +206,33 @@ export async function generateScript(
   if (!text) throw new GeminiError("Gemini không trả về nội dung.", 500);
   let raw: unknown;
   try {
-    raw = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, ""));
+    raw = extractJson(text);
   } catch {
     throw new GeminiError("Gemini trả về JSON không hợp lệ. Hãy thử lại.", 500);
   }
+  return finalizeScript(raw, params);
+}
+
+/** Pull the JSON object out of an AI chat answer (handles ```json fences and text around it). */
+export function extractJson(text: string): unknown {
+  const t = text.trim().replace(/^\uFEFF/, "");
+  const fence = /```(?:json)?\s*([\s\S]*?)```/i.exec(t);
+  const body = fence ? fence[1] : t;
+  const first = body.indexOf("{");
+  const last = body.lastIndexOf("}");
+  if (first < 0 || last <= first) throw new Error("Không tìm thấy khối JSON { ... } trong nội dung đã dán.");
+  const slice = body
+    .slice(first, last + 1)
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/,\s*([}\]])/g, "$1");
+  return JSON.parse(slice);
+}
+
+/** Validate + normalise a raw director JSON (from Gemini API or pasted from any AI chat). */
+export function finalizeScript(raw: unknown, params: { topic: string; duration: number; language: Language }): ScriptData {
   const obj = { ...(raw as Record<string, unknown>), topic: params.topic, language: params.language, targetDuration: params.duration };
   const v = validateScript(obj);
-  if (!v.ok || !v.data) throw new GeminiError(`JSON từ Gemini sai cấu trúc: ${v.errors.slice(0, 3).join("; ")}`, 500);
+  if (!v.ok || !v.data) throw new GeminiError(`JSON sai cấu trúc: ${v.errors.slice(0, 4).join("; ")}`, 500);
   const data = v.data;
   const durations = normaliseDurations(
     data.scenes.map((s) => s.duration),
@@ -222,6 +242,29 @@ export async function generateScript(
   const joined = data.scenes.map((s) => s.narration.trim()).join(" ");
   data.voiceoverScript = cleanVoiceover(data.voiceoverScript || joined);
   return data;
+}
+
+/** Prompt to paste into Claude / Gemini / ChatGPT chat when working without an API key. */
+export function buildManualDirectorPrompt(topic: string, duration: number, language: Language): string {
+  const example = {
+    title: "string",
+    voiceoverScript: "string – toàn bộ lời đọc sạch, nối các narration theo thứ tự",
+    characters: [{ name: "string", description: "locked English visual description" }],
+    scenes: [
+      {
+        id: 1,
+        duration: 3.5,
+        narration: "string",
+        shotType: "wide | medium | close_up | extreme_close_up",
+        cameraEffect: "static | punch_zoom_in | slow_zoom | dramatic_shake | freeze_grayscale | flash_cut",
+        sfx: "none | vine_boom | record_scratch | whoosh | pop | ding | cricket",
+        imagePrompt: `English prompt ..., ${STYLE_LOCK}`,
+      },
+    ],
+  };
+  return `${buildDirectorPrompt(topic, duration, language).replace("Return ONLY JSON that matches the schema.", "")}
+OUTPUT FORMAT – return ONE JSON object only, inside a single \`\`\`json code block, no explanation before or after. Exact structure (pick exactly one value for each enum field):
+${JSON.stringify(example, null, 2)}`;
 }
 
 /* ------------------------------ Image generation ------------------------------ */
