@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { AudioLines, Play, Square, Wand2, Loader2 } from "lucide-react";
 import { useStudio } from "@/store/studio";
 import { getPlayer } from "@/lib/player";
-import { LOCAL_VOICES, VOICE_SAMPLES, concatFloat, floatToWav, synthesize, type TtsOptions } from "@/lib/localTts";
+import { LOCAL_VOICES, VOICE_SAMPLES, concatFloat, floatToWav, normalizePeak, synthesize, type TtsOptions } from "@/lib/localTts";
 import { MIN_SCENE_DURATION } from "@/lib/constants";
 import type { Language, Scene } from "@/lib/types";
 import { Button, Panel, ProgressBar, Select, cx } from "./ui";
@@ -98,6 +98,8 @@ export default function VoiceStudio() {
         parts.push(seg);
       });
       const all = concatFloat(parts);
+      // one gain for the whole track keeps every scene at the same loudness, without clipping
+      normalizePeak([all]);
       const st = useStudio.getState();
       st.setDurations(durations);
       const voiceName = LOCAL_VOICES[lang].find((v) => v.id === voiceId)?.name ?? voiceId;

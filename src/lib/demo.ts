@@ -963,7 +963,7 @@ export async function buildDemoProject(): Promise<{ project: Project; blobs: Rec
     },
     sceneAssets,
     characterRefs: [{ key: sheetKey, kind: "image", mime: "image/png", name: "teo-hoa-character-sheet.png" }],
-    voiceover: { key: voiceKey, kind: "audio", mime: "audio/wav", name: "demo-voice-babble.wav" },
+    voiceover: { key: voiceKey, kind: "audio", mime: "audio/wav", name: "giong-demo-bap-be (khong phai giong that).wav" },
     customSfx: {},
     captions: { ...DEFAULT_CAPTIONS },
   };

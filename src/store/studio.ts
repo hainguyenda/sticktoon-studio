@@ -222,11 +222,14 @@ export const useStudio = create<StudioState>((set, get) => {
       const removed = Object.entries(p.sceneAssets).filter(([k]) => !keep.has(k));
       removed.forEach(([, ref]) => void dropKey(ref));
       const sceneAssets = Object.fromEntries(Object.entries(p.sceneAssets).filter(([k]) => keep.has(k)));
+      // a brand-new script no longer matches the old voice track
+      if (!keepAssets && p.voiceover) void dropKey(p.voiceover);
       mutateProject((pp) => ({
         ...pp,
         name: script.title || pp.name,
         script,
         sceneAssets,
+        voiceover: keepAssets ? pp.voiceover : null,
       }));
       set({ selectedSceneId: script.scenes[0]?.id ?? null });
     },

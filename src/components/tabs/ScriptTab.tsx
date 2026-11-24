@@ -62,7 +62,7 @@ export default function ScriptTab({ onOpenSettings }: { onOpenSettings: () => vo
     setPasteError(null);
     try {
       const data = finalizeScript(extractJson(pasted), { topic: topic.trim(), duration, language });
-      if (script.scenes.length && !window.confirm("Thay kịch bản hiện tại bằng kịch bản vừa dán? (ảnh các cảnh cũ sẽ bị gỡ)")) return;
+      if (script.scenes.length && !window.confirm("Thay kịch bản hiện tại bằng kịch bản vừa dán? (ảnh các cảnh và giọng đọc cũ sẽ bị gỡ)")) return;
       setScript(data, { keepAssets: false });
       setPasted("");
       toast("success", `Đã áp dụng kịch bản “${data.title}” – ${data.scenes.length} cảnh.`);
@@ -235,7 +235,7 @@ export default function ScriptTab({ onOpenSettings }: { onOpenSettings: () => vo
             </div>
           )}
           {script.scenes.length > 0 && (
-            <p className="text-[11px] text-gray-500">⚠ Tạo kịch bản mới sẽ thay thế kịch bản và gỡ toàn bộ ảnh cảnh hiện tại (ảnh nhân vật tham chiếu & giọng đọc được giữ).</p>
+            <p className="text-[11px] text-gray-500">⚠ Kịch bản mới sẽ thay thế kịch bản hiện tại, gỡ ảnh các cảnh và giọng đọc cũ (ảnh nhân vật mẫu được giữ). Sau đó vào Tab 3 bấm “Đọc từng cảnh”.</p>
           )}
         </div>
       </Panel>

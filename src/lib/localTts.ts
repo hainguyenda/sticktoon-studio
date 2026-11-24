@@ -389,10 +389,43 @@ export async function synthesize(text: string, o: TtsOptions): Promise<Synth> {
     if (o.signal?.aborted) throw new DOMException("Đã hủy", "AbortError");
     const a = await synthChunk(chunks[i], o);
     sr = a.sr;
-    parts.push(a.audio);
+    parts.push(applyFades(Float32Array.from(a.audio), sr));
     if (i < chunks.length - 1) parts.push(new Float32Array(Math.round(sr * o.pause)));
   }
-  return { audio: concatFloat(parts), sr };
+  const audio = concatFloat(parts);
+  normalizePeak([audio]);
+  return { audio, sr };
+}
+
+/** Short linear fade in/out so chunk edges never click. */
+export function applyFades(buf: Float32Array, sr: number, ms = 8): Float32Array {
+  const n = Math.min(Math.floor((sr * ms) / 1000), Math.floor(buf.length / 2));
+  for (let i = 0; i < n; i++) {
+    const g = i / n;
+    buf[i] *= g;
+    buf[buf.length - 1 - i] *= g;
+  }
+  return buf;
+}
+
+export function peakOf(bufs: Float32Array[]): number {
+  let peak = 0;
+  for (const b of bufs) for (let i = 0; i < b.length; i++) {
+    const v = Math.abs(b[i]);
+    if (v > peak) peak = v;
+  }
+  return peak;
+}
+
+/**
+ * Scale buffers in place so the loudest sample sits at `target` (≈ -1 dBFS).
+ * The TTS models can output samples above 1.0, which would hard-clip (crackle) when written to WAV.
+ */
+export function normalizePeak(bufs: Float32Array[], target = 0.89): void {
+  const peak = peakOf(bufs);
+  if (peak <= 0) return;
+  const g = target / peak;
+  for (const b of bufs) for (let i = 0; i < b.length; i++) b[i] *= g;
 }
 
 export function concatFloat(parts: Float32Array[]): Float32Array {
