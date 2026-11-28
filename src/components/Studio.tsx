@@ -151,6 +151,7 @@ function Header({ onSettings, onProjects }: { onSettings: () => void; onProjects
   const saveStatus = useStudio((s) => s.saveStatus);
   const newProject = useStudio((s) => s.newProject);
   const loadDemo = useStudio((s) => s.loadDemo);
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-ink-700 bg-ink-900 px-3">
@@ -190,7 +191,31 @@ function Header({ onSettings, onProjects }: { onSettings: () => void; onProjects
       <div className="ml-auto flex items-center gap-1">
         <HeaderBtn icon={<FolderOpen className="h-4 w-4" />} label="Projects" onClick={onProjects} />
         <HeaderBtn icon={<FilePlus2 className="h-4 w-4" />} label="Mới" onClick={() => void newProject()} />
-        <HeaderBtn icon={<Plane className="h-4 w-4" />} label="Demo" onClick={() => void loadDemo()} />
+        <div className="relative">
+          <HeaderBtn icon={<Plane className="h-4 w-4" />} label="Demo" onClick={() => setDemoOpen((o) => !o)} />
+          {demoOpen && (
+            <div className="absolute right-0 z-40 mt-1 w-60 rounded-lg border border-ink-600 bg-ink-850 p-1 shadow-xl" onMouseLeave={() => setDemoOpen(false)}>
+              {(
+                [
+                  ["plane", "Chuyến bay định mệnh", "5 cảnh · tiếng Việt"],
+                  ["parachute", "Three Parachutes", "10 cảnh · tiếng Anh"],
+                ] as const
+              ).map(([id, title, sub]) => (
+                <button
+                  key={id}
+                  onClick={() => {
+                    setDemoOpen(false);
+                    void loadDemo(id);
+                  }}
+                  className="block w-full rounded-md px-3 py-2 text-left hover:bg-ink-700"
+                >
+                  <span className="block text-sm font-semibold text-gray-100">{title}</span>
+                  <span className="block text-[11px] text-gray-500">{sub}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <button
           onClick={onSettings}
           className={cx(

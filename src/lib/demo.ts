@@ -110,7 +110,7 @@ function sweat(ctx: Ctx, x: number, y: number, s: number) {
 /* ------------------------------ heads ------------------------------ */
 
 interface HeadOpts {
-  hair?: "teo" | "hoa" | "none" | "bald" | "curly";
+  hair?: "teo" | "hoa" | "bun" | "captain" | "none" | "bald" | "curly";
   lookX?: number;
   lookY?: number;
   tilt?: number;
@@ -122,7 +122,7 @@ function head(ctx: Ctx, cx: number, cy: number, r: number, expr: Expr, o: HeadOp
   ctx.translate(cx, cy);
   ctx.rotate(o.tilt ?? 0);
   // hair behind head
-  if (o.hair === "hoa") {
+  if (o.hair === "hoa" || o.hair === "bun") {
     shape(ctx, C.hair, lw, () => ctx.arc(r * 0.72, -r * 0.62, r * 0.36, 0, Math.PI * 2));
   }
   shape(ctx, HEAD, lw, () => ctx.arc(0, 0, r, 0, Math.PI * 2));
@@ -139,18 +139,30 @@ function head(ctx: Ctx, cx: number, cy: number, r: number, expr: Expr, o: HeadOp
       [r * 0.28, -r * 0.93],
       [r * 0.42, -r * 1.3],
     ]);
-  } else if (o.hair === "hoa") {
+  } else if (o.hair === "captain") {
+    // pilot cap: crown, brim and gold badge
+    shape(ctx, C.navy, lw, () => {
+      ctx.moveTo(-r * 0.95, -r * 0.55);
+      ctx.quadraticCurveTo(-r * 1.05, -r * 1.25, 0, -r * 1.3);
+      ctx.quadraticCurveTo(r * 1.05, -r * 1.25, r * 0.95, -r * 0.55);
+      ctx.closePath();
+    });
+    shape(ctx, INK, 0, () => ctx.ellipse(0, -r * 0.55, r * 1.02, r * 0.16, 0, 0, Math.PI * 2));
+    shape(ctx, "#e7c14d", lw * 0.6, () => ctx.arc(0, -r * 0.92, r * 0.14, 0, Math.PI * 2));
+  } else if (o.hair === "hoa" || o.hair === "bun") {
     shape(ctx, C.hair, lw, () => {
       ctx.moveTo(-r * 0.98, -r * 0.1);
       ctx.quadraticCurveTo(-r * 0.9, -r * 1.05, 0, -r * 1.02);
       ctx.quadraticCurveTo(r * 0.95, -r * 1.0, r * 0.98, -r * 0.1);
       ctx.quadraticCurveTo(r * 0.4, -r * 0.62, -r * 0.98, -r * 0.1);
     });
-    // pillbox cap
-    ctx.save();
-    ctx.rotate(-0.2);
-    shape(ctx, C.navy, lw, () => rrect(ctx, -r * 0.45, -r * 1.25, r * 0.8, r * 0.32, r * 0.08));
-    ctx.restore();
+    if (o.hair === "hoa") {
+      // pillbox cap
+      ctx.save();
+      ctx.rotate(-0.2);
+      shape(ctx, C.navy, lw, () => rrect(ctx, -r * 0.45, -r * 1.25, r * 0.8, r * 0.32, r * 0.08));
+      ctx.restore();
+    }
   } else if (o.hair === "curly") {
     for (let i = -3; i <= 3; i++) {
       const a = -Math.PI / 2 + i * 0.32;
@@ -357,8 +369,8 @@ function shirt(ctx: Ctx, cx: number, top: number, w: number, h: number, color: s
   });
 }
 
-function dress(ctx: Ctx, cx: number, top: number, w: number, h: number, lw: number) {
-  shape(ctx, C.navy, lw, () => {
+function dress(ctx: Ctx, cx: number, top: number, w: number, h: number, lw: number, color: string = C.navy) {
+  shape(ctx, color, lw, () => {
     ctx.moveTo(cx - w * 0.3, top);
     ctx.lineTo(cx + w * 0.3, top);
     ctx.lineTo(cx + w * 0.6, top + h);
@@ -969,3 +981,8 @@ export async function buildDemoProject(): Promise<{ project: Project; blobs: Rec
   };
   return { project, blobs };
 }
+
+/** Drawing kit shared with other built-in stories. */
+export const kit = { INK, HEAD, C, newCanvas, toBlob, shape, rrect, line, cloud, sweat, head, hand, shirt, dress };
+export type KitCtx = Ctx;
+export type KitExpr = Expr;

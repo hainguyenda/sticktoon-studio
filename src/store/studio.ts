@@ -101,7 +101,7 @@ interface StudioState {
   removeCustomSfx: (type: RealSfx) => Promise<void>;
 
   newProject: () => Promise<void>;
-  loadDemo: () => Promise<void>;
+  loadDemo: (which?: "plane" | "parachute") => Promise<void>;
   openProject: (id: string) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
   importProject: (project: Project, blobs: Record<string, Blob>) => Promise<void>;
@@ -376,19 +376,26 @@ export const useStudio = create<StudioState>((set, get) => {
       set({ activeTab: "script" });
     },
 
-    async loadDemo() {
-      set({ busy: "Đang vẽ project demo (stickman + giọng demo)…" });
+    async loadDemo(which = "plane") {
+      set({ busy: "Đang vẽ project demo (stickman)…" });
       try {
         await get().saveNow();
-        const { buildDemoProject } = await import("@/lib/demo");
-        const { project, blobs } = await buildDemoProject();
+        const { project, blobs } =
+          which === "parachute"
+            ? await (await import("@/lib/demoParachute")).buildParachuteProject()
+            : await (await import("@/lib/demo")).buildDemoProject();
         for (const [k, b] of Object.entries(blobs)) {
           await putBlob(k, b);
           primeBlob(k, b);
         }
         await putProject(project);
         activate(project);
-        get().toast("success", "Đã nạp project demo “Chuyến bay định mệnh”. Bấm Play để xem!");
+        get().toast(
+          "success",
+          which === "parachute"
+            ? "Đã nạp demo “Three Parachutes”. Vào Tab 3 bấm “Đọc từng cảnh” để tạo giọng Anh."
+            : "Đã nạp project demo “Chuyến bay định mệnh”. Bấm Play để xem!",
+        );
       } catch (e) {
         console.error(e);
         get().toast("error", `Không tạo được demo: ${(e as Error).message}`);
