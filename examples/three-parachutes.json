@@ -1,0 +1,117 @@
+{
+  "title": "Three Parachutes",
+  "topic": "Three black parachutes and one red school bag with the same pattern on a falling plane",
+  "language": "en",
+  "targetDuration": 60,
+  "voiceoverScript": "Mid-flight, both engines die. The plane starts falling! The captain bursts in. Bad news. We have three parachutes, and four people. Three black packs hang by the door. Plus one red one. Same straps, same buckle. The captain grabs one. I'm the captain! I must survive! I go first! And just like that, he's gone. The mom grabs the red one. I'm a woman! Ladies get priority! And she jumps too. Two kids left. Two parachutes. Easy math. Then one kid screams. Hey! That lady took my school bag! Somewhere below, she pulls the cord. Out come pencils, a lunchbox, and math homework.",
+  "characters": [
+    {
+      "name": "Captain",
+      "description": "airline captain with round pure-white head, navy pilot cap with a gold badge and black brim, huge round cartoon eyes, white short-sleeve uniform shirt with gold shoulder stripes and a navy tie, thin black stick limbs"
+    },
+    {
+      "name": "Mom",
+      "description": "woman with round pure-white head, black hair in a bun, large eyes, muted magenta A-line dress, thin black stick arms and legs"
+    },
+    {
+      "name": "Kid 1",
+      "description": "small kid with round pure-white head, curly black hair, big eyes, muted green t-shirt, thin black stick limbs – owner of the red school backpack"
+    },
+    {
+      "name": "Kid 2",
+      "description": "small kid with round pure-white head, three short black spiky hair strands, big eyes, muted orange t-shirt, thin black stick limbs"
+    }
+  ],
+  "scenes": [
+    {
+      "id": 1,
+      "duration": 5.5,
+      "narration": "Mid-flight, both engines die. The plane starts falling!",
+      "shotType": "wide",
+      "cameraEffect": "dramatic_shake",
+      "sfx": "whoosh",
+      "imagePrompt": "Tilted wide shot of an airplane cabin under red emergency light, smoke and fire outside the windows, Captain, Mom, Kid 1 and Kid 2 screaming with arms up, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    },
+    {
+      "id": 2,
+      "duration": 7.2,
+      "narration": "The captain bursts in. Bad news. We have three parachutes, and four people.",
+      "shotType": "medium",
+      "cameraEffect": "punch_zoom_in",
+      "sfx": "record_scratch",
+      "imagePrompt": "Medium shot, sweating Captain holds up three fingers, behind him a wall rack with three black parachute packs and one red backpack, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    },
+    {
+      "id": 3,
+      "duration": 8,
+      "narration": "Three black packs hang by the door. Plus one red one. Same straps, same buckle.",
+      "shotType": "close_up",
+      "cameraEffect": "slow_zoom",
+      "sfx": "none",
+      "imagePrompt": "Close-up of a cabin wall rack: three identical black parachute packs and one red backpack with the exact same straps and buckle, soft spotlight on the red one, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    },
+    {
+      "id": 4,
+      "duration": 7.2,
+      "narration": "The captain grabs one. I'm the captain! I must survive! I go first!",
+      "shotType": "medium",
+      "cameraEffect": "punch_zoom_in",
+      "sfx": "pop",
+      "imagePrompt": "Medium shot, smug Captain hugging a black parachute pack to his chest, Mom and the two kids gasping in the background, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    },
+    {
+      "id": 5,
+      "duration": 2.6,
+      "narration": "And just like that, he's gone.",
+      "shotType": "wide",
+      "cameraEffect": "flash_cut",
+      "sfx": "whoosh",
+      "imagePrompt": "Wide shot through the open airplane door, blue sky and clouds, the Captain tumbling away wearing a black parachute pack, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    },
+    {
+      "id": 6,
+      "duration": 6.8,
+      "narration": "The mom grabs the red one. I'm a woman! Ladies get priority!",
+      "shotType": "medium",
+      "cameraEffect": "punch_zoom_in",
+      "sfx": "ding",
+      "imagePrompt": "Medium shot, smug Mom holding the red backpack high above her head like a trophy, two black packs left on the rack, the kids staring, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    },
+    {
+      "id": 7,
+      "duration": 2.2,
+      "narration": "And she jumps too.",
+      "shotType": "wide",
+      "cameraEffect": "flash_cut",
+      "sfx": "whoosh",
+      "imagePrompt": "Wide shot through the open airplane door, Mom falling away happily with the red backpack on her back, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    },
+    {
+      "id": 8,
+      "duration": 5.2,
+      "narration": "Two kids left. Two parachutes. Easy math.",
+      "shotType": "medium",
+      "cameraEffect": "static",
+      "sfx": "cricket",
+      "imagePrompt": "Medium shot, Kid 1 and Kid 2 grinning calmly under the rack holding the last two black parachute packs, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    },
+    {
+      "id": 9,
+      "duration": 6.3,
+      "narration": "Then one kid screams. Hey! That lady took my school bag!",
+      "shotType": "close_up",
+      "cameraEffect": "dramatic_shake",
+      "sfx": "record_scratch",
+      "imagePrompt": "Close-up of Kid 1 in total panic pointing at the empty hook where the red backpack used to hang, sweat drops, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    },
+    {
+      "id": 10,
+      "duration": 7.6,
+      "narration": "Somewhere below, she pulls the cord. Out come pencils, a lunchbox, and math homework.",
+      "shotType": "extreme_close_up",
+      "cameraEffect": "freeze_grayscale",
+      "sfx": "vine_boom",
+      "imagePrompt": "Extreme close-up in the sky, Mom's deadpan face while falling, the opened red school backpack spilling textbooks, pencils and a lunchbox around her, 2D flat cartoon animation style, thick bold black ink outlines, minimalist stickman-hybrid characters with large expressive cartoon eyes, muted flat color background, clean framing, 2K resolution, no text, no speech bubbles, no captions, no watermark"
+    }
+  ]
+}
